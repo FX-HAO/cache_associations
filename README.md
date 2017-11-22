@@ -1,4 +1,6 @@
 # CacheAssociations
+[![Gem Version](https://badge.fury.io/rb/cache_associations.svg)](https://badge.fury.io/rb/cache_associations)
+[![Dependency Status](https://gemnasium.com/badges/github.com/FX-HAO/cache_associations.svg)](https://gemnasium.com/github.com/FX-HAO/cache_associations)
 
 CacheAssociations is a simple cache implementation to make Low-Level caching collaborate with Association caching.
 
