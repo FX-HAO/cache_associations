@@ -40,7 +40,7 @@ end
 ```
 
 The `cache_association` defines a method `cached_profile` to fetch data from the cache store.
-And `cache_association` accepts a block to define the cache name, it's `[self.class.name, id, name, updated_at.to_i]` in default.
+And `cache_association` accepts an optional block to define the cache name, it's `[self.class.name, id, name, updated_at.to_i]` in default.
 
 ```ruby
 irb> u = User.take
