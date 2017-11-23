@@ -40,6 +40,8 @@ end
 ```
 
 The `cache_association` defines a method `cached_profile` to fetch data from the cache store.
+You may also specify additional options via the options argument, it's the same as `ActiveSupport::Cache::Store#fetch`, 
+such as setting `:expires_in` will set an expiration time on the cache.
 And `cache_association` accepts an optional block to define the cache name, it's `[self.class.name, id, name, updated_at.to_i]` in default.
 
 ```ruby
