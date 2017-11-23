@@ -10,10 +10,11 @@ module CacheAssociations
       unless reflection = reflect_on_association(name)
         raise UndefinedAssociationError, "Undefined asscociation #{name}"
       end
+      cache_association_names[name.to_sym] = cache_name_block
       options = Rails.cache.options.merge(options)
 
       define_method("cached_#{name}") do |*args, &block|
-        cache_name = cache_name_block.nil? ? [self.class.name, id, name, updated_at.to_i] : instance_exec(&cache_name_block)
+        cache_name = cache_name_block.nil? ? default_cache_name(name) : instance_exec(&cache_name_block)
         cache = Rails.cache.fetch(cache_name, **options) do
           break instance_exec(*args, &block) if !block.nil?
 
@@ -33,5 +34,45 @@ module CacheAssociations
         cache
       end
     end
+
+    def has_cache_association?(name)
+      cache_association_names.has_key?(name.to_sym)
+    end
+
+    def custom_cache_name?(name)
+      !!cache_association_names[name.to_sym]
+    end
+
+    def cache_name_block(name)
+      cache_association_names[name.to_sym]
+    end
+
+    private
+
+    def cache_association_names
+      @cache_association_names ||= {}
+    end
+  end
+
+  def cache_association_name(name)
+    if !!cache_name_block = self.class.cache_name_block(name)
+      instance_exec(&cache_name_block)
+    elsif self.class.has_cache_association?(name)
+      default_cache_name(name)
+    else
+      nil
+    end
+  end
+
+  def clear_caching_on_association(name)
+    return nil if !!cache_name = cache_association_name(name)
+
+    Rails.cache.delete(cache_name)
+  end
+
+  private
+
+  def default_cache_name(name)
+    [self.class.name, id, name.to_s, updated_at.to_i]
   end
 end
