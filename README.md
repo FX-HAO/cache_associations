@@ -50,6 +50,20 @@ irb> u.profile.reload # refetch from the database
   Profile Load (1.4ms) SELECT  "profiles".* FROM "profiles" WHERE "profiles"."user_id" = $1 LIMIT $2  [["id", 1], ["LIMIT", 1]]
 ```
 
+You may customize what the data you cached, the cached method accepts an optional block that determines how to cache data. 
+But it will break the original association, so you should be careful with this feature.
+
+```
+irb> u = User.take
+irb> u.cached_profile do "gotcha" end
+=> "gotcha"
+irb> u.profile # it breaks
+(Object doesn't support #inspect)
+=> 
+irb> u.profile.reload # restore
+  Profile Load (1.4ms) SELECT  "profiles".* FROM "profiles" WHERE "profiles"."user_id" = $1 LIMIT $2  [["id", 1], ["LIMIT", 1]]
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

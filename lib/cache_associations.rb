@@ -14,7 +14,13 @@ module CacheAssociations
       define_method("cached_#{name}") do |*args, &block|
         cache_name = cache_name_block.nil? ? [self.class.name, id, name, updated_at.to_i] : instance_exec(&cache_name_block)
         cache = Rails.cache.fetch(cache_name) do
-          send("#{name}", *args, &block)
+          break instance_exec(*args, &block) if !block.nil?
+
+          if reflection.collection?
+            send("#{name}", *args).to_a
+          else
+            send("#{name}", *args)
+          end
         end
 
         if association_instance_get(name).nil?
