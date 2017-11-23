@@ -50,6 +50,7 @@ irb> u.cached_profile # fetch from the cache store
 irb> u.profile # fetch the cached version
 irb> u.profile.reload # refetch from the database
   Profile Load (1.4ms) SELECT  "profiles".* FROM "profiles" WHERE "profiles"."user_id" = $1 LIMIT $2  [["id", 1], ["LIMIT", 1]]
+irb> u.clear_caching_on_association(:profile) # clear the cache
 ```
 
 You may customize what the data you cached, the cached method accepts an optional block that determines how to cache data. 
