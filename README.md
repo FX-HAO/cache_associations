@@ -32,6 +32,11 @@ class User < ApplicationRecord
     # put your cache name here
     [self.class.name, id, 'profile', update_at.to_i]
   end
+  
+  def factorial_1000
+    (1..1000).inject(:*)
+  end
+  cache_method :factorial_1000 # use cached_factorial_1000
 end
 
 class Profile < ApplicationRecord
@@ -43,6 +48,9 @@ The `cache_association` defines a method `cached_profile` to fetch data from the
 You may also specify additional options via the options argument, it's the same as `ActiveSupport::Cache::Store#fetch`, 
 such as setting `:expires_in` will set an expiration time on the cache.
 And `cache_association` accepts an optional block to define the cache name, it's `[self.class.name, id, name, updated_at.to_i]` in default.
+
+
+You can use `cache_method` to cache something else, like attributes and methods.
 
 ```ruby
 irb> u = User.take

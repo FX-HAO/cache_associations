@@ -10,7 +10,7 @@ module CacheAssociations
       unless reflection = reflect_on_association(name)
         raise UndefinedAssociationError, "Undefined asscociation #{name}"
       end
-      cache_association_names[name.to_sym] = cache_name_block
+      register_cache_name_block(name, cache_name_block)
       options = Rails.cache.options.merge(options)
 
       define_method("cached_#{name}") do |*args, &block|
@@ -34,23 +34,42 @@ module CacheAssociations
         cache
       end
     end
+    
+    def cache_method(name, **options, &cache_name_block)
+      register_cache_name_block(name, cache_name_block)
+      options = Rails.cache.options.merge(options)
+
+      define_method("cached_#{name}") do |*args, &block|
+        cache_name = cache_name_block.nil? ? default_cache_name(name) : instance_exec(&cache_name_block)
+        Rails.cache.fetch(cache_name, **options) do
+          break instance_exec(*args, &block) if !block.nil?
+          
+          send("#{name}", *args)
+        end
+      end
+    end
 
     def has_cache_association?(name)
-      cache_association_names.has_key?(name.to_sym)
+      cache_name_blocks.has_key?(name.to_sym)
     end
 
     def custom_cache_name?(name)
-      !!cache_association_names[name.to_sym]
+      !!cache_name_blocks[name.to_sym]
     end
 
     def cache_name_block(name)
-      cache_association_names[name.to_sym]
+      cache_name_blocks[name.to_sym]
     end
 
     private
 
-    def cache_association_names
-      @cache_association_names ||= {}
+    def register_cache_name_block(name, cache_name_block)
+      warn "#{name} has been cached before." if has_cache_association?(name)
+      cache_name_blocks[name] = cache_name_block
+    end
+
+    def cache_name_blocks
+      @cache_name_blocks ||= {}
     end
   end
 
