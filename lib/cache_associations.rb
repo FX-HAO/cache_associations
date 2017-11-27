@@ -84,7 +84,7 @@ module CacheAssociations
   end
 
   def clear_caching_on_association(name)
-    return nil if !!cache_name = cache_association_name(name)
+    return nil if !cache_name = cache_association_name(name)
 
     Rails.cache.delete(cache_name)
   end
