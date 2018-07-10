@@ -10,6 +10,11 @@ module CacheAssociations
       unless reflection = reflect_on_association(name)
         raise UndefinedAssociationError, "Undefined asscociation #{name}"
       end
+
+      unless block_given?
+        cache_name_block = lambda { [self.class.name, id, name, updated_at.to_i] }
+      end
+
       register_cache_name_block(name, cache_name_block)
       options = Rails.cache.options.merge(options)
 
@@ -33,6 +38,18 @@ module CacheAssociations
 
         cache
       end
+    end
+
+    def cache_global_association(name, global_key = nil, **options)
+      reflection = reflect_on_association(name)
+      foreign_key = reflection.foreign_key
+
+      if global_key.blank?
+        global_key = reflection.klass.name
+      end
+
+      cache_name_block = lambda { [global_key, send(foreign_key)] }
+      cache_association(name, **options, &cache_name_block)
     end
     
     def cache_method(name, **options, &cache_name_block)

@@ -29,9 +29,18 @@ class User < ApplicationRecord
 
   has_one :profile
   cache_association :profile do 
-    # put your cache name here
+    # Put your cache name here
+    # 
+    # This is the default naming convention,
+    # so if you follow the naming strategy,
+    # you are free with providing the block
     [self.class.name, id, 'profile', update_at.to_i]
   end
+  
+  # you do not need to provide a block to specify the cache 
+  # name, this will provide you a default name composed of  
+  # [reflection.klass.name, send(reflection.foreign_key)]
+  cache_global_association :profile
   
   def factorial_1000
     (1..1000).inject(:*)
@@ -64,7 +73,7 @@ irb> u.clear_caching_on_association(:profile) # clear the cache
 You may customize what the data you cached, the cached method accepts an optional block that determines how to cache data. 
 But it will break the original association, so you should be careful with this feature.
 
-```
+```ruby
 irb> u = User.take
 irb> u.cached_profile do "gotcha" end
 => "gotcha"
