@@ -19,6 +19,8 @@ module CacheAssociations
       options = Rails.cache.options.merge(options)
 
       define_method("cached_#{name}") do |*args, &block|
+        break send(name) unless association_instance_get(name).nil?
+
         cache_name = cache_name_block.nil? ? default_cache_name(name) : instance_exec(&cache_name_block)
         cache = Rails.cache.fetch(cache_name, **options) do
           break instance_exec(*args, &block) if !block.nil?
